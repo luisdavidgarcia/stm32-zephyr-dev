@@ -4,7 +4,7 @@ CONTAINER_NAME := "stm32-dev"
 all: fedora
 
 build_macOS:
-	docker build -t $(CONTAINER_NAME) -f Dockerfile
+	container build -t $(CONTAINER_NAME) -f Dockerfile
 
 run_macOS: build_macOS
 	container run --rm -it \
