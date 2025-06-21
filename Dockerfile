@@ -5,13 +5,19 @@ RUN dnf update -y && dnf install -y \
   g++ \
   cmake \
   make \
-  git \
   wget \
+  git \
   openocd \
   libusb \
   stlink \
   && dnf clean all
 
+RUN wget https://developer.arm.com/-/media/Files/downloads/gnu/14.2.rel1/binrel/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi.tar.xz \
+  && tar -xvf arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt/ \
+  && rm arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi.tar.xz
+
+ENV PATH="/opt/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi/bin:${PATH}"
+
 WORKDIR /workspace
 
-CMD ["bash"]
+CMD ["/bin/bash"]
