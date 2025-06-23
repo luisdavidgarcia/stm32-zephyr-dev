@@ -1,5 +1,5 @@
 WORKDIR := $(shell pwd)
-CONTAINER_NAME := "stm32-dev"
+CONTAINER_NAME := "stm32-zephyr-dev"
 
 all: fedora
 

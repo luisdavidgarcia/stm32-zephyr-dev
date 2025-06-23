@@ -1,23 +1,73 @@
 FROM fedora:42
 
-RUN dnf update -y && dnf install -y \
-  gcc \
-  g++ \
-  cmake \
-  make \
+# Install development tools and other necessary packages, including optional ones
+RUN dnf update -y \
+  && dnf group install -y c-development --with-optional \
+  && dnf install -y \
+  ninja-build \
+  gperf \
+  dfu-util \
+  which \
+  python3.13 \
+  python3-pip \
+  python3-tkinter \
+  xz \
+  file \
+  python3-devel \
+  SDL2-devel \
   wget \
   git \
   openocd \
   libusb \
   stlink \
+  unzip \
+  dtc \
   && dnf clean all
 
+# Install GNU ARM Toolchain
 RUN wget https://developer.arm.com/-/media/Files/downloads/gnu/14.2.rel1/binrel/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi.tar.xz \
   && tar -xvf arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt/ \
   && rm arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi.tar.xz
 
-ENV PATH="/opt/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi/bin:${PATH}"
-
+# Set working directory for the Zephyr project
 WORKDIR /workspace
 
+# Install `west` using pip
+RUN pip3 install west
+
+# Set environment variables
+ENV PATH="/opt/arm-gnu-toolchain-14.2.rel1-x86_64-arm-none-eabi/bin:${PATH}"
+
+# Initialize and update the Zephyr project
+RUN west init ~/zephyrproject \
+  && cd ~/zephyrproject \
+  && west update \
+  && west zephyr-export
+  #&& west packages pip --install
+
+# Manually install the required Python dependencies globally (bypassing virtualenv)
+RUN pip3 install --no-cache-dir -r /root/zephyrproject/zephyr/scripts/requirements.txt
+
+# Install the Zephyr SDK using west
+RUN cd /root/zephyrproject/zephyr \
+  && west sdk install
+
+# Copy the STM32CubeProgrammer ZIP file into the container (ensure this file is in the same directory as your Dockerfile)
+COPY en.stm32cubeprg-lin-v2-19-0.zip /root/
+
+# Unzip the STM32CubeProgrammer package
+RUN unzip /root/en.stm32cubeprg-lin-v2-19-0.zip -d /root/ \
+  && rm /root/en.stm32cubeprg-lin-v2-19-0.zip
+
+# Copy the auto-install.xml 
+COPY auto-install.xml /workspace/
+
+# Install STM32CubePRogrammer package
+RUN /root/SetupSTM32CubeProgrammer-2.19.0.linux /workspace/auto-install.xml
+
+# Set the PATH to include the STM32CubeProgrammer binaries
+ENV PATH="/usr/local/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin:${PATH}"
+
+# Start shell
 CMD ["/bin/bash"]
+
