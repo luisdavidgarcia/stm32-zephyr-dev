@@ -11,7 +11,7 @@ reproducible way.
 
 Flashing a basic Blinky firmware from inside the container to an STM32L476RG board.
 
-![Flash Blinky on STM32](assets/blinky-flash-demo.gif)
+https://github.com/user-attachments/assets/5ee36c98-2a3a-447a-9173-24d6baebbf33
 
 LED (LD2) blinking on STM32L476RG board.
 
